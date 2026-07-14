@@ -1,0 +1,23 @@
+# ── 파이썬 ────────────────────────────────
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# ── colcon 빌드 산출물 ────────────────────
+build/
+install/
+log/
+
+# ── 런타임 산출물 ─────────────────────────
+# 감지 노드가 상태 JSON 을 쓰는 곳 (폴더 구조는 .keep 으로 유지)
+outputs/*
+!outputs/.keep
+# ros2_db_node / db_update 가 이미지를 쌓는 곳
+2_ros2_packages/sqlite3db/sqlite3db/camera_frames/*.jpg
+2_ros2_packages/sqlite3db/sqlite3db/camera_frames/snapshots/*.jpg
+
+# ── 편집기/OS ─────────────────────────────
+.vscode/
+.idea/
+*.swp
+.DS_Store

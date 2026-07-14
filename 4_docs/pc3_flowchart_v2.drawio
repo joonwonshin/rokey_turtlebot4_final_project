@@ -1,0 +1,885 @@
+<mxfile host="app.diagrams.net" modified="2026-07-10T00:00:00.000Z" agent="claude" version="24.0.0" type="device">
+  <diagram id="pc3_v2" name="PC3 Flow v2">
+    <mxGraphModel dx="1800" dy="1400" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2500" pageHeight="3200" math="0" shadow="0" background="#0A0A15">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- Title -->
+        <mxCell id="title" value="PC3 (webcam detection 전담 · NVIDIA GPU) — 사람·안전모 인식, YOLO POSE + YOLO TRACKING, 헬멧 착용/쓰러짐/무단침입 판정, ROS 2 발행" style="text;html=1;fillColor=none;strokeColor=none;fontColor=#E8E0FF;fontSize=17;fontStyle=1;align=center;" vertex="1" parent="1">
+          <mxGeometry x="100" y="20" width="2300" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Outer container -->
+        <mxCell id="pc3_outer" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#7A7ABC;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="40" y="80" width="2420" height="3080" as="geometry" />
+        </mxCell>
+
+        <!-- ================================================== -->
+        <!-- webcam_monitor_cam0 group                          -->
+        <!-- ================================================== -->
+        <mxCell id="cam0_group" value="webcam_monitor_cam0 — 웹캠A로 구역 A 안전모 착용/미착용·쓰러짐·입장허가 상시 감시" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#9080D0;strokeWidth=2;fontColor=#C8B8FF;fontSize=13;fontStyle=1;verticalAlign=top;align=left;spacingLeft=15;spacingTop=8;" vertex="1" parent="1">
+          <mxGeometry x="70" y="110" width="1180" height="1300" as="geometry" />
+        </mxCell>
+
+        <!-- cam0: ROI 설정 결정 -->
+        <mxCell id="c0_dec_roi" value="입구 ROI가&#10;저장되어 있는가?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#2E2A1E;strokeColor=#D4A83B;fontColor=#F0E0A8;fontSize=11;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="120" y="170" width="180" height="100" as="geometry" />
+        </mxCell>
+
+        <mxCell id="c0_setup" value="--mode set_roi 로&#10;맵 위에 폴리곤을 클릭해&#10;entry_roi.json 생성" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#25203A;strokeColor=#9080D0;fontColor=#D8CFEA;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="360" y="190" width="240" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="c0_roi_no" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#E06060;fontColor=#F0B0B0;fontSize=11;" edge="1" source="c0_dec_roi" target="c0_setup" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxCell as="value" value="아니오" />
+          </mxGeometry>
+          <mxCell as="value" value="아니오" />
+        </mxCell>
+
+        <!-- cam0: 프레임 취득 -->
+        <mxCell id="c0_read" value="USB 웹캠A에서&#10;1280×720 프레임을 취득한다" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#25203A;strokeColor=#9080D0;fontColor=#D8CFEA;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="120" y="330" width="280" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_c0_roi_read" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#7EDB7E;fontColor=#B8FFB8;fontSize=11;" edge="1" source="c0_dec_roi" target="c0_read" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxCell as="value" value="예" />
+          </mxGeometry>
+          <mxCell as="value" value="예" />
+        </mxCell>
+
+        <!-- cam0: YOLO detection -->
+        <mxCell id="c0_yolo_det" value="YOLO best.pt로&#10;사람 bbox와 안전모 bbox 검출&#10;(ByteTrack으로 track_id 부여)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#25203A;strokeColor=#9080D0;fontColor=#D8CFEA;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="80" y="440" width="280" height="70" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_c0_read_det" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#B0B0D0;fontColor=#DDDDF0;fontSize=10;" edge="1" source="c0_read" target="c0_yolo_det" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxCell as="value" value="BGR 프레임" />
+          </mxGeometry>
+          <mxCell as="value" value="BGR 프레임" />
+        </mxCell>
+
+        <!-- cam0: YOLO pose -->
+        <mxCell id="c0_yolo_pose" value="YOLO 11s-pose로&#10;17개 관절 키포인트 추출&#10;(코·눈·어깨·발목 등)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#25203A;strokeColor=#9080D0;fontColor=#D8CFEA;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="420" y="440" width="280" height="70" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_c0_read_pose" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#B0B0D0;fontColor=#DDDDF0;fontSize=10;" edge="1" source="c0_read" target="c0_yolo_pose" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxCell as="value" value="BGR 프레임" />
+          </mxGeometry>
+          <mxCell as="value" value="BGR 프레임" />
+        </mxCell>
+
+        <!-- cam0: IoU 매칭 -->
+        <mxCell id="c0_match" value="사람 bbox와 pose 결과를&#10;IoU 최대값으로 매칭한다" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#25203A;strokeColor=#9080D0;fontColor=#D8CFEA;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="220" y="550" width="280" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_c0_det_match" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#B0B0D0;fontColor=#DDDDF0;fontSize=10;" edge="1" source="c0_yolo_det" target="c0_match" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxCell as="value" value="person + helmet bbox&#10;+ track_id" />
+          </mxGeometry>
+          <mxCell as="value" value="person + helmet bbox&#10;+ track_id" />
+        </mxCell>
+
+        <mxCell id="e_c0_pose_match" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#B0B0D0;fontColor=#DDDDF0;fontSize=10;" edge="1" source="c0_yolo_pose" target="c0_match" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxCell as="value" value="17 keypoints" />
+          </mxGeometry>
+          <mxCell as="value" value="17 keypoints" />
+        </mxCell>
+
+        <!-- cam0: 지도 좌표 변환 -->
+        <mxCell id="c0_h" value="발 픽셀을 호모그래피 H로&#10;지도 미터 좌표(map_xy)로 변환&#10;(재투영 오차 약 7 cm)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2E2318;strokeColor=#D4A050;fontColor=#F0D8A8;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="220" y="650" width="280" height="70" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_c0_match_h" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#B0B0D0;fontColor=#DDDDF0;fontSize=10;" edge="1" source="c0_match" target="c0_h" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxCell as="value" value="발 픽셀 좌표" />
+          </mxGeometry>
+          <mxCell as="value" value="발 픽셀 좌표" />
+        </mxCell>
+
+        <!-- cam0: head_z 역산 -->
+        <mxCell id="c0_z" value="지도 좌표(x,y) 위 수직선에서&#10;머리 픽셀에 맞는 z를 P로 역산해&#10;머리 높이 head_z 추정" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2E2318;strokeColor=#D4A050;fontColor=#F0D8A8;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="220" y="760" width="280" height="70" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_c0_h_z" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#B0B0D0;fontColor=#DDDDF0;fontSize=10;" edge="1" source="c0_h" target="c0_z" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxCell as="value" value="map_xy [m] + 머리 픽셀" />
+          </mxGeometry>
+          <mxCell as="value" value="map_xy [m] + 머리 픽셀" />
+        </mxCell>
+
+        <!-- cam0: 헬멧 판정 diamond -->
+        <mxCell id="c0_dec_helmet" value="머리 주변에&#10;안전모 bbox가 있는가?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#2E2A1E;strokeColor=#D4A83B;fontColor=#F0E0A8;fontSize=11;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="120" y="880" width="200" height="100" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_c0_z_dec_helmet" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#B0B0D0;fontColor=#DDDDF0;fontSize=10;" edge="1" source="c0_z" target="c0_dec_helmet" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxCell as="value" value="head_z [m], head_px" />
+          </mxGeometry>
+          <mxCell as="value" value="head_z [m], head_px" />
+        </mxCell>
+
+        <!-- cam0: 헬멧 미착용 3초 유지 -->
+        <mxCell id="c0_dec_helmet_dur" value="NO_HELMET이&#10;3초 이상 유지되는가?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#2E2A1E;strokeColor=#D4A83B;fontColor=#F0E0A8;fontSize=11;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="360" y="880" width="200" height="100" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_c0_helmet_no" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#E06060;fontColor=#F0B0B0;fontSize=11;" edge="1" source="c0_dec_helmet" target="c0_dec_helmet_dur" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxCell as="value" value="아니오 (미착용)" />
+          </mxGeometry>
+          <mxCell as="value" value="아니오 (미착용)" />
+        </mxCell>
+
+        <!-- cam0: 미착용 경보 발생 -->
+        <mxCell id="c0_helmet_alert" value="미착용 경보 생성&#10;helmet_alert = True" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#4A1E1E;strokeColor=#E85050;fontColor=#F8C8C8;fontSize=11;fontStyle=1;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="600" y="880" width="240" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_c0_helmet_alert" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#E06060;fontColor=#F0B0B0;fontSize=11;" edge="1" source="c0_dec_helmet_dur" target="c0_helmet_alert" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxCell as="value" value="예" />
+          </mxGeometry>
+          <mxCell as="value" value="예" />
+        </mxCell>
+
+        <!-- cam0: 쓰러짐 결정 -->
+        <mxCell id="c0_dec_lying" value="쓰러진 자세가&#10;5초 이상 유지되는가?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#2E2A1E;strokeColor=#D4A83B;fontColor=#F0E0A8;fontSize=11;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="120" y="1030" width="200" height="100" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_c0_z_lying" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#B0B0D0;fontColor=#DDDDF0;fontSize=10;" edge="1" source="c0_dec_helmet" target="c0_dec_lying" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxCell as="value" value="예(착용)&#10;head_z 계속 감시" />
+          </mxGeometry>
+          <mxCell as="value" value="예(착용)&#10;head_z 계속 감시" />
+        </mxCell>
+
+        <!-- cam0: emergency 발생 -->
+        <mxCell id="c0_emergency" value="긴급 경보 생성&#10;emergency = True" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#4A1E1E;strokeColor=#E85050;fontColor=#F8C8C8;fontSize=11;fontStyle=1;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="360" y="1030" width="240" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_c0_lying_yes" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#E06060;fontColor=#F0B0B0;fontSize=11;" edge="1" source="c0_dec_lying" target="c0_emergency" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxCell as="value" value="예" />
+          </mxGeometry>
+          <mxCell as="value" value="예" />
+        </mxCell>
+
+        <!-- cam0: 회복 결정 -->
+        <mxCell id="c0_dec_recovery" value="정자세 회복이&#10;3초 이상 유지되는가?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#2E2A1E;strokeColor=#D4A83B;fontColor=#F0E0A8;fontSize=11;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="640" y="1030" width="200" height="100" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_c0_emergency_recovery" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#B0B0D0;fontColor=#DDDDF0;fontSize=10;" edge="1" source="c0_emergency" target="c0_dec_recovery" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxCell as="value" value="emergency 유지 중" />
+          </mxGeometry>
+          <mxCell as="value" value="emergency 유지 중" />
+        </mxCell>
+
+        <!-- cam0: emergency 해제 -->
+        <mxCell id="c0_emergency_clear" value="emergency = False&#10;(해제)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1E4A2E;strokeColor=#50E080;fontColor=#C8F8D0;fontSize=11;fontStyle=1;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="880" y="1030" width="200" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_c0_recovery_yes" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#7EDB7E;fontColor=#B8FFB8;fontSize=11;" edge="1" source="c0_dec_recovery" target="c0_emergency_clear" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxCell as="value" value="예" />
+          </mxGeometry>
+          <mxCell as="value" value="예" />
+        </mxCell>
+
+        <!-- cam0: entry decision -->
+        <mxCell id="c0_dec_entry" value="입구 ROI 안에서&#10;손 들고 안전모 착용 상태가&#10;3초 유지되는가?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#2E2A1E;strokeColor=#D4A83B;fontColor=#F0E0A8;fontSize=11;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="120" y="1180" width="220" height="120" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_c0_lying_entry" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#B0B0D0;fontColor=#DDDDF0;fontSize=10;" edge="1" source="c0_dec_lying" target="c0_dec_entry" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxCell as="value" value="정상 자세" />
+          </mxGeometry>
+          <mxCell as="value" value="정상 자세" />
+        </mxCell>
+
+        <!-- cam0: ACCESS_GRANTED -->
+        <mxCell id="c0_access" value="입장 허용&#10;access_granted = True" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1E4A2E;strokeColor=#50E080;fontColor=#C8F8D0;fontSize=11;fontStyle=1;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="400" y="1170" width="240" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_c0_entry_yes" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#7EDB7E;fontColor=#B8FFB8;fontSize=11;" edge="1" source="c0_dec_entry" target="c0_access" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxCell as="value" value="예" />
+          </mxGeometry>
+          <mxCell as="value" value="예" />
+        </mxCell>
+
+        <!-- cam0: UNAUTHORIZED -->
+        <mxCell id="c0_unauth" value="무단 침입 감지&#10;unauthorized = True" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#4A1E3A;strokeColor=#E850B0;fontColor=#F8C8E4;fontSize=11;fontStyle=1;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="400" y="1250" width="240" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_c0_entry_no" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#E060B0;fontColor=#F0B0D0;fontSize=11;" edge="1" source="c0_dec_entry" target="c0_unauth" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxCell as="value" value="아니오이면서&#10;ROI를 벗어나면" />
+          </mxGeometry>
+          <mxCell as="value" value="아니오이면서&#10;ROI를 벗어나면" />
+        </mxCell>
+
+        <!-- ================================================== -->
+        <!-- webcam_monitor_cam1 group                          -->
+        <!-- ================================================== -->
+        <mxCell id="cam1_group" value="webcam_monitor_cam1 — 웹캠B로 구역 B 안전모 착용/미착용·쓰러짐 상시 감시 (MONITOR ONLY, ROI 판정 없음)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#9080D0;strokeWidth=2;fontColor=#C8B8FF;fontSize=13;fontStyle=1;verticalAlign=top;align=left;spacingLeft=15;spacingTop=8;" vertex="1" parent="1">
+          <mxGeometry x="1280" y="110" width="1160" height="1300" as="geometry" />
+        </mxCell>
+
+        <mxCell id="c1_read" value="USB 웹캠B에서&#10;1280×720 프레임을 취득한다" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#25203A;strokeColor=#9080D0;fontColor=#D8CFEA;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="1360" y="180" width="280" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="c1_yolo_det" value="YOLO best.pt로&#10;사람 bbox와 안전모 bbox 검출&#10;(ByteTrack, cam0과 track_id 독립)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#25203A;strokeColor=#9080D0;fontColor=#D8CFEA;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="1330" y="280" width="300" height="70" as="geometry" />
+        </mxCell>
+
+        <mxCell id="c1_yolo_pose" value="YOLO 11s-pose로&#10;17개 관절 키포인트 추출&#10;(pose 모델은 cam0과 공유)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#25203A;strokeColor=#9080D0;fontColor=#D8CFEA;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="1690" y="280" width="300" height="70" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_c1_read_det" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#B0B0D0;fontColor=#DDDDF0;fontSize=10;" edge="1" source="c1_read" target="c1_yolo_det" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxCell as="value" value="BGR 프레임" />
+          </mxGeometry>
+          <mxCell as="value" value="BGR 프레임" />
+        </mxCell>
+
+        <mxCell id="e_c1_read_pose" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#B0B0D0;fontColor=#DDDDF0;fontSize=10;" edge="1" source="c1_read" target="c1_yolo_pose" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxCell as="value" value="BGR 프레임" />
+          </mxGeometry>
+          <mxCell as="value" value="BGR 프레임" />
+        </mxCell>
+
+        <mxCell id="c1_geom" value="사람↔pose IoU 매칭 후&#10;발 픽셀을 H로 지도 좌표로 변환하고&#10;머리 픽셀 + 발 좌표로 head_z 역산" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2E2318;strokeColor=#D4A050;fontColor=#F0D8A8;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="1480" y="400" width="360" height="80" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_c1_det_geom" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#B0B0D0;fontColor=#DDDDF0;fontSize=10;" edge="1" source="c1_yolo_det" target="c1_geom" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxCell as="value" value="person + helmet bbox" />
+          </mxGeometry>
+          <mxCell as="value" value="person + helmet bbox" />
+        </mxCell>
+
+        <mxCell id="e_c1_pose_geom" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#B0B0D0;fontColor=#DDDDF0;fontSize=10;" edge="1" source="c1_yolo_pose" target="c1_geom" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxCell as="value" value="17 keypoints" />
+          </mxGeometry>
+          <mxCell as="value" value="17 keypoints" />
+        </mxCell>
+
+        <!-- cam1 helmet decision -->
+        <mxCell id="c1_dec_helmet" value="머리 주변에&#10;안전모 bbox가 있는가?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#2E2A1E;strokeColor=#D4A83B;fontColor=#F0E0A8;fontSize=11;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="1340" y="530" width="200" height="100" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_c1_geom_helmet" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#B0B0D0;fontColor=#DDDDF0;fontSize=10;" edge="1" source="c1_geom" target="c1_dec_helmet" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxCell as="value" value="map_xy, head_z, head_px" />
+          </mxGeometry>
+          <mxCell as="value" value="map_xy, head_z, head_px" />
+        </mxCell>
+
+        <mxCell id="c1_dec_helmet_dur" value="NO_HELMET이&#10;3초 이상 유지되는가?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#2E2A1E;strokeColor=#D4A83B;fontColor=#F0E0A8;fontSize=11;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="1600" y="530" width="200" height="100" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_c1_helmet_no" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#E06060;fontColor=#F0B0B0;fontSize=11;" edge="1" source="c1_dec_helmet" target="c1_dec_helmet_dur" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxCell as="value" value="아니오" />
+          </mxGeometry>
+          <mxCell as="value" value="아니오" />
+        </mxCell>
+
+        <mxCell id="c1_helmet_alert" value="미착용 경보 생성&#10;helmet_alert = True" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#4A1E1E;strokeColor=#E85050;fontColor=#F8C8C8;fontSize=11;fontStyle=1;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="1840" y="530" width="240" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_c1_helmet_alert" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#E06060;fontColor=#F0B0B0;fontSize=11;" edge="1" source="c1_dec_helmet_dur" target="c1_helmet_alert" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxCell as="value" value="예" />
+          </mxGeometry>
+          <mxCell as="value" value="예" />
+        </mxCell>
+
+        <!-- cam1 emergency -->
+        <mxCell id="c1_dec_lying" value="쓰러진 자세가&#10;5초 이상 유지되는가?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#2E2A1E;strokeColor=#D4A83B;fontColor=#F0E0A8;fontSize=11;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="1340" y="700" width="200" height="100" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_c1_helmet_lying" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#B0B0D0;fontColor=#DDDDF0;fontSize=10;" edge="1" source="c1_dec_helmet" target="c1_dec_lying" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxCell as="value" value="예(착용)" />
+          </mxGeometry>
+          <mxCell as="value" value="예(착용)" />
+        </mxCell>
+
+        <mxCell id="c1_emergency" value="긴급 경보 생성&#10;emergency = True" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#4A1E1E;strokeColor=#E85050;fontColor=#F8C8C8;fontSize=11;fontStyle=1;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="1600" y="700" width="240" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_c1_lying_yes" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#E06060;fontColor=#F0B0B0;fontSize=11;" edge="1" source="c1_dec_lying" target="c1_emergency" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxCell as="value" value="예" />
+          </mxGeometry>
+          <mxCell as="value" value="예" />
+        </mxCell>
+
+        <mxCell id="c1_dec_recovery" value="정자세 회복이&#10;3초 이상 유지되는가?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#2E2A1E;strokeColor=#D4A83B;fontColor=#F0E0A8;fontSize=11;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="1880" y="700" width="200" height="100" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_c1_emergency_recovery" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#B0B0D0;fontColor=#DDDDF0;fontSize=10;" edge="1" source="c1_emergency" target="c1_dec_recovery" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxCell as="value" value="emergency 유지 중" />
+          </mxGeometry>
+          <mxCell as="value" value="emergency 유지 중" />
+        </mxCell>
+
+        <mxCell id="c1_emergency_clear" value="emergency = False&#10;(해제)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1E4A2E;strokeColor=#50E080;fontColor=#C8F8D0;fontSize=11;fontStyle=1;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="1880" y="850" width="200" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_c1_recovery_yes" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#7EDB7E;fontColor=#B8FFB8;fontSize=11;" edge="1" source="c1_dec_recovery" target="c1_emergency_clear" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxCell as="value" value="예" />
+          </mxGeometry>
+          <mxCell as="value" value="예" />
+        </mxCell>
+
+        <mxCell id="c1_monitor_note" value="cam1은 입구 ROI 판정을 하지 않는다&#10;(access_granted / unauthorized 판정 없음)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1A1A2A;strokeColor=#6060A0;fontColor=#A0A0C8;fontSize=10;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="1360" y="1050" width="360" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- WorkerStateStore 합류 (cam0/cam1 공용 텍스트) -->
+        <mxCell id="worker_note_c0" value="위 판정들은 WorkerStateStore가&#10;히스토리 다수결로 스무딩하고&#10;hold_sec 동안 유지한다" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#3D243D;strokeColor=#D46FE0;fontColor=#F0D0F0;fontSize=10;align=center;" vertex="1" parent="1">
+          <mxGeometry x="80" y="1340" width="1080" height="55" as="geometry" />
+        </mxCell>
+
+        <mxCell id="worker_note_c1" value="위 판정들은 WorkerStateStore가&#10;히스토리 다수결로 스무딩하고&#10;hold_sec 동안 유지한다" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#3D243D;strokeColor=#D46FE0;fontColor=#F0D0F0;fontSize=10;align=center;" vertex="1" parent="1">
+          <mxGeometry x="1300" y="1340" width="1120" height="55" as="geometry" />
+        </mxCell>
+
+        <!-- ================================================== -->
+        <!-- GlobalFuser                                        -->
+        <!-- ================================================== -->
+        <mxCell id="fuser_group" value="GlobalFuser — 두 카메라의 detection을 map 좌표 기반으로 통합" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#00A8C8;strokeWidth=2;fontColor=#80DCEC;fontSize=13;fontStyle=1;verticalAlign=top;align=left;spacingLeft=15;spacingTop=8;" vertex="1" parent="1">
+          <mxGeometry x="70" y="1450" width="2370" height="290" as="geometry" />
+        </mxCell>
+
+        <mxCell id="fuser_input" value="cam0과 cam1의 detection 목록을&#10;하나로 이어붙인다" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#183040;strokeColor=#00A8C8;fontColor=#A8DCE8;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="110" y="1510" width="280" height="70" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_c0_fuser" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#00A8C8;fontColor=#A8DCE8;fontSize=11;strokeWidth=2;" edge="1" source="worker_note_c0" target="fuser_input" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxCell as="value" value="cam0 detection 목록&#10;(state_key, map_xy,&#10;emergency, helmet_alert, ...)" />
+          </mxGeometry>
+          <mxCell as="value" value="cam0 detection 목록&#10;(state_key, map_xy,&#10;emergency, helmet_alert, ...)" />
+        </mxCell>
+
+        <mxCell id="e_c1_fuser" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#00A8C8;fontColor=#A8DCE8;fontSize=11;strokeWidth=2;" edge="1" source="worker_note_c1" target="fuser_input" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxCell as="value" value="cam1 detection 목록" />
+          </mxGeometry>
+          <mxCell as="value" value="cam1 detection 목록" />
+        </mxCell>
+
+        <mxCell id="fuser_dec" value="이전 프레임에서 이미&#10;같은 트랙이 어떤 인격에 붙었나?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#2E2A1E;strokeColor=#D4A83B;fontColor=#F0E0A8;fontSize=11;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="470" y="1500" width="240" height="90" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_fuser_input_dec" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#00A8C8;fontColor=#A8DCE8;fontSize=10;" edge="1" source="fuser_input" target="fuser_dec" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxCell as="value" value="each detection" />
+          </mxGeometry>
+          <mxCell as="value" value="each detection" />
+        </mxCell>
+
+        <mxCell id="fuser_rebind" value="같은 인격에 재연결&#10;(REBIND, 1.2 m 이내면 유지)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#183040;strokeColor=#00A8C8;fontColor=#A8DCE8;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="770" y="1470" width="240" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_fuser_dec_rebind" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#7EDB7E;fontColor=#B8FFB8;fontSize=11;" edge="1" source="fuser_dec" target="fuser_rebind" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxCell as="value" value="예" />
+          </mxGeometry>
+          <mxCell as="value" value="예" />
+        </mxCell>
+
+        <mxCell id="fuser_dec2" value="지도 좌표에서 65 cm 이내에&#10;기존 인격이 있는가?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#2E2A1E;strokeColor=#D4A83B;fontColor=#F0E0A8;fontSize=11;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="770" y="1560" width="240" height="90" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_fuser_dec_dec2" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#E06060;fontColor=#F0B0B0;fontSize=11;" edge="1" source="fuser_dec" target="fuser_dec2" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxCell as="value" value="아니오" />
+          </mxGeometry>
+          <mxCell as="value" value="아니오" />
+        </mxCell>
+
+        <mxCell id="fuser_nearest" value="가장 가까운 인격에 붙임&#10;(NEAREST match)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#183040;strokeColor=#00A8C8;fontColor=#A8DCE8;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="1070" y="1540" width="240" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_fuser_dec2_nearest" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#7EDB7E;fontColor=#B8FFB8;fontSize=11;" edge="1" source="fuser_dec2" target="fuser_nearest" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxCell as="value" value="예" />
+          </mxGeometry>
+          <mxCell as="value" value="예" />
+        </mxCell>
+
+        <mxCell id="fuser_new" value="새로운 인격 생성&#10;(NEW gid = G0, G1, ...)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#183040;strokeColor=#00A8C8;fontColor=#A8DCE8;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="1070" y="1620" width="240" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_fuser_dec2_new" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#E06060;fontColor=#F0B0B0;fontSize=11;" edge="1" source="fuser_dec2" target="fuser_new" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxCell as="value" value="아니오" />
+          </mxGeometry>
+          <mxCell as="value" value="아니오" />
+        </mxCell>
+
+        <mxCell id="fuser_fuse" value="같은 인격에 붙은&#10;detection들의 좌표를&#10;가중 평균으로 융합한다" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#183040;strokeColor=#00A8C8;fontColor=#A8DCE8;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="1400" y="1540" width="260" height="75" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_fuser_rebind_fuse" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#00A8C8;fontColor=#A8DCE8;fontSize=10;" edge="1" source="fuser_rebind" target="fuser_fuse" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_fuser_nearest_fuse" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#00A8C8;fontColor=#A8DCE8;fontSize=10;" edge="1" source="fuser_nearest" target="fuser_fuse" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_fuser_new_fuse" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#00A8C8;fontColor=#A8DCE8;fontSize=10;" edge="1" source="fuser_new" target="fuser_fuse" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="fuser_out" value="각 detection에 global_id를 붙여&#10;bridge로 전달한다" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#183040;strokeColor=#00A8C8;fontColor=#A8DCE8;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="1750" y="1548" width="260" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_fuser_fuse_out" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#00A8C8;fontColor=#A8DCE8;fontSize=10;" edge="1" source="fuser_fuse" target="fuser_out" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxCell as="value" value="융합된 map_xy" />
+          </mxGeometry>
+          <mxCell as="value" value="융합된 map_xy" />
+        </mxCell>
+
+        <mxCell id="fuser_limit_note" value="※ 첫 프레임에서 두 카메라가 동시에 같은 사람을 처음 보면 서로 다른 gid로 갈라진다.&#10;   ros_bridge의 위치 근접 dedup(0.5 m)이 안전망 역할." style="text;html=1;fontColor=#D4A050;fontSize=10;fontStyle=2;align=left;" vertex="1" parent="1">
+          <mxGeometry x="2050" y="1560" width="380" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- ================================================== -->
+        <!-- SafetyRosBridge                                    -->
+        <!-- ================================================== -->
+        <mxCell id="bridge_group" value="SafetyRosBridge — rclpy 노드로 PC4에 상태·좌표·영상을 발행" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#E85090;strokeWidth=2;fontColor=#F8B0D0;fontSize=13;fontStyle=1;verticalAlign=top;align=left;spacingLeft=15;spacingTop=8;" vertex="1" parent="1">
+          <mxGeometry x="70" y="1780" width="2370" height="720" as="geometry" />
+        </mxCell>
+
+        <!-- Camera stream publisher -->
+        <mxCell id="br_cam_dec" value="cam0/cam1의 오버레이 프레임을&#10;마지막 발행 후 1/15초가 지났는가?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#2E2A1E;strokeColor=#D4A83B;fontColor=#F0E0A8;fontSize=11;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="110" y="1850" width="280" height="90" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_fuser_br_cam" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#9080D0;fontColor=#C8B8FF;fontSize=10;strokeWidth=2;" edge="1" source="fuser_out" target="br_cam_dec" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxCell as="value" value="cam0_view, cam1_view&#10;(YOLO 오버레이된 BGR)" />
+          </mxGeometry>
+          <mxCell as="value" value="cam0_view, cam1_view&#10;(YOLO 오버레이된 BGR)" />
+        </mxCell>
+
+        <mxCell id="br_cam_encode" value="JPEG로 압축해&#10;CompressedImage로 발행" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#3A1E32;strokeColor=#E85090;fontColor=#F8C8DE;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="130" y="1980" width="240" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_br_cam_yes" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#7EDB7E;fontColor=#B8FFB8;fontSize=11;" edge="1" source="br_cam_dec" target="br_cam_encode" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxCell as="value" value="예 (인코딩 진행)" />
+          </mxGeometry>
+          <mxCell as="value" value="예 (인코딩 진행)" />
+        </mxCell>
+
+        <mxCell id="br_cam_skip" value="이번 프레임은 발행 생략&#10;(카메라 스톨 방지)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1A1A2A;strokeColor=#6060A0;fontColor=#A0A0C8;fontSize=10;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="130" y="2080" width="240" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_br_cam_no" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#B0B0D0;fontColor=#DDDDF0;fontSize=10;" edge="1" source="br_cam_dec" target="br_cam_skip" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxCell as="value" value="아니오" />
+          </mxGeometry>
+          <mxCell as="value" value="아니오" />
+        </mxCell>
+
+        <!-- Emergency edge -->
+        <mxCell id="br_emg_dec" value="이번 프레임에서&#10;emergency가 새로 켜졌는가?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#2E2A1E;strokeColor=#D4A83B;fontColor=#F0E0A8;fontSize=11;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="470" y="1850" width="260" height="90" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_fuser_br_emg" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#9080D0;fontColor=#C8B8FF;fontSize=10;strokeWidth=2;" edge="1" source="fuser_out" target="br_emg_dec" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxCell as="value" value="global_id별 dedup된&#10;emergency 대상" />
+          </mxGeometry>
+          <mxCell as="value" value="global_id별 dedup된&#10;emergency 대상" />
+        </mxCell>
+
+        <mxCell id="br_emg_fire" value="긴급 상태 알림과&#10;쓰러진 위치를 한 번 발행&#10;(대상은 정지 상태라 재발행 불필요)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#4A1E1E;strokeColor=#E85050;fontColor=#F8C8C8;fontSize=11;fontStyle=1;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="480" y="1980" width="260" height="80" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_br_emg_yes" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#E06060;fontColor=#F0B0B0;fontSize=11;" edge="1" source="br_emg_dec" target="br_emg_fire" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxCell as="value" value="예 (엣지)" />
+          </mxGeometry>
+          <mxCell as="value" value="예 (엣지)" />
+        </mxCell>
+
+        <mxCell id="br_emg_dec2" value="지속되던 emergency가&#10;이번에 해제되었는가?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#2E2A1E;strokeColor=#D4A83B;fontColor=#F0E0A8;fontSize=11;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="470" y="2100" width="260" height="90" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_br_emg_no" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#B0B0D0;fontColor=#DDDDF0;fontSize=10;" edge="1" source="br_emg_dec" target="br_emg_dec2" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxCell as="value" value="아니오" />
+          </mxGeometry>
+          <mxCell as="value" value="아니오" />
+        </mxCell>
+
+        <mxCell id="br_emg_clear" value="해제 알림을 한 번 발행" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1E4A2E;strokeColor=#50E080;fontColor=#C8F8D0;fontSize=11;fontStyle=1;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="480" y="2230" width="260" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_br_emg_dec2_yes" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#7EDB7E;fontColor=#B8FFB8;fontSize=11;" edge="1" source="br_emg_dec2" target="br_emg_clear" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxCell as="value" value="예" />
+          </mxGeometry>
+          <mxCell as="value" value="예" />
+        </mxCell>
+
+        <!-- Helmet follow -->
+        <mxCell id="br_hlm_smooth" value="이번 헬멧 미착용자의&#10;지도 좌표를 EMA로 스무딩&#10;(α = 0.3)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#3A2E1A;strokeColor=#E89050;fontColor=#F8D8B0;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="830" y="1855" width="280" height="80" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_fuser_br_hlm" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#9080D0;fontColor=#C8B8FF;fontSize=10;strokeWidth=2;" edge="1" source="fuser_out" target="br_hlm_smooth" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxCell as="value" value="global_id별 dedup된&#10;helmet_alert 대상 (map_xy)" />
+          </mxGeometry>
+          <mxCell as="value" value="global_id별 dedup된&#10;helmet_alert 대상 (map_xy)" />
+        </mxCell>
+
+        <mxCell id="br_hlm_dec" value="새로 켜졌거나&#10;마지막 발행 후 0.5초 지났고&#10;스무딩 좌표가 10 cm 이상 이동?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#2E2A1E;strokeColor=#D4A83B;fontColor=#F0E0A8;fontSize=11;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="830" y="1975" width="280" height="110" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_br_hlm_smooth_dec" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#B0B0D0;fontColor=#DDDDF0;fontSize=10;" edge="1" source="br_hlm_smooth" target="br_hlm_dec" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxCell as="value" value="스무딩된 좌표" />
+          </mxGeometry>
+          <mxCell as="value" value="스무딩된 좌표" />
+        </mxCell>
+
+        <mxCell id="br_hlm_fire" value="미착용 상태 알림과&#10;최신 위치를 발행&#10;(사람이 걸어가면 계속 갱신)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#4A2E1A;strokeColor=#E89050;fontColor=#F8D8B0;fontSize=11;fontStyle=1;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="840" y="2120" width="260" height="80" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_br_hlm_yes" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#E89050;fontColor=#F8D8B0;fontSize=11;" edge="1" source="br_hlm_dec" target="br_hlm_fire" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxCell as="value" value="예" />
+          </mxGeometry>
+          <mxCell as="value" value="예" />
+        </mxCell>
+
+        <mxCell id="br_hlm_clear_dec" value="이번에&#10;미착용 상태가 해제되었는가?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#2E2A1E;strokeColor=#D4A83B;fontColor=#F0E0A8;fontSize=11;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="830" y="2240" width="280" height="90" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_br_hlm_no" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#B0B0D0;fontColor=#DDDDF0;fontSize=10;" edge="1" source="br_hlm_dec" target="br_hlm_clear_dec" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxCell as="value" value="아니오 (스킵)" />
+          </mxGeometry>
+          <mxCell as="value" value="아니오 (스킵)" />
+        </mxCell>
+
+        <mxCell id="br_hlm_clear" value="해제 알림을 한 번 발행" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1E4A2E;strokeColor=#50E080;fontColor=#C8F8D0;fontSize=11;fontStyle=1;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="840" y="2360" width="260" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_br_hlm_clear_yes" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#7EDB7E;fontColor=#B8FFB8;fontSize=11;" edge="1" source="br_hlm_clear_dec" target="br_hlm_clear" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxCell as="value" value="예" />
+          </mxGeometry>
+          <mxCell as="value" value="예" />
+        </mxCell>
+
+        <!-- Unauthorized edge -->
+        <mxCell id="br_uauth_dec" value="이번 프레임에서&#10;무단 침입이 새로 감지됐는가?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#2E2A1E;strokeColor=#D4A83B;fontColor=#F0E0A8;fontSize=11;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="1200" y="1850" width="280" height="90" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_fuser_br_uauth" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#9080D0;fontColor=#C8B8FF;fontSize=10;strokeWidth=2;" edge="1" source="fuser_out" target="br_uauth_dec" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxCell as="value" value="global_id별 dedup된&#10;unauthorized 대상" />
+          </mxGeometry>
+          <mxCell as="value" value="global_id별 dedup된&#10;unauthorized 대상" />
+        </mxCell>
+
+        <mxCell id="br_uauth_fire" value="무단 침입 알림과&#10;위치를 한 번 발행&#10;(AMR 출동 없음, 대시보드 경보용)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#4A1E3A;strokeColor=#E850B0;fontColor=#F8C8E4;fontSize=11;fontStyle=1;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="1210" y="1980" width="260" height="80" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_br_uauth_yes" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#E060B0;fontColor=#F0B0D0;fontSize=11;" edge="1" source="br_uauth_dec" target="br_uauth_fire" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxCell as="value" value="예 (엣지)" />
+          </mxGeometry>
+          <mxCell as="value" value="예 (엣지)" />
+        </mxCell>
+
+        <mxCell id="br_uauth_dec2" value="지속되던 무단 침입이&#10;이번에 해제되었는가?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#2E2A1E;strokeColor=#D4A83B;fontColor=#F0E0A8;fontSize=11;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="1200" y="2100" width="280" height="90" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_br_uauth_no" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#B0B0D0;fontColor=#DDDDF0;fontSize=10;" edge="1" source="br_uauth_dec" target="br_uauth_dec2" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxCell as="value" value="아니오" />
+          </mxGeometry>
+          <mxCell as="value" value="아니오" />
+        </mxCell>
+
+        <mxCell id="br_uauth_clear" value="해제 알림을 한 번 발행" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1E4A2E;strokeColor=#50E080;fontColor=#C8F8D0;fontSize=11;fontStyle=1;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="1210" y="2230" width="260" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_br_uauth_dec2_yes" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#7EDB7E;fontColor=#B8FFB8;fontSize=11;" edge="1" source="br_uauth_dec2" target="br_uauth_clear" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxCell as="value" value="예" />
+          </mxGeometry>
+          <mxCell as="value" value="예" />
+        </mxCell>
+
+        <!-- Persons markers -->
+        <mxCell id="br_marker" value="모든 인원의 지도상 위치를&#10;RViz용 마커 배열로 그린다&#10;(매 프레임, 상태별 색상)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1E3A20;strokeColor=#60D080;fontColor=#C8F0D0;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="1550" y="1870" width="280" height="80" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_fuser_br_marker" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#9080D0;fontColor=#C8B8FF;fontSize=10;strokeWidth=2;" edge="1" source="fuser_out" target="br_marker" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxCell as="value" value="전체 detection&#10;(global_id + map_xy)" />
+          </mxGeometry>
+          <mxCell as="value" value="전체 detection&#10;(global_id + map_xy)" />
+        </mxCell>
+
+        <!-- Note -->
+        <mxCell id="br_note" value="발행 순서와 시점:&#10;• 카메라 영상은 초당 15장 상한으로 흘려보낸다 (스톨 방지).&#10;• 상태 알림(emergency/helmet/unauthorized)은 &quot;변화하는 순간&quot;에만 발행한다.&#10;• 헬멧 좌표만 사람이 이동하므로 스무딩 후 계속 갱신한다.&#10;• 이 모든 발행 뒤에 rclpy.spin_once(timeout=0)로 DDS 워커에 CPU를 짧게 넘긴다." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1A1A2A;strokeColor=#6060A0;fontColor=#B0B0D0;fontSize=10;align=left;spacingLeft=15;" vertex="1" parent="1">
+          <mxGeometry x="1560" y="2100" width="800" height="140" as="geometry" />
+        </mxCell>
+
+        <!-- ================================================== -->
+        <!-- ROS 2 Topics 발행 대상                              -->
+        <!-- ================================================== -->
+        <mxCell id="topics_group" value="→ PC4로 발행되는 ROS 2 토픽 9종" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#D4A83B;strokeWidth=2;fontColor=#F0E0A8;fontSize=13;fontStyle=1;verticalAlign=top;align=left;spacingLeft=15;spacingTop=8;" vertex="1" parent="1">
+          <mxGeometry x="70" y="2540" width="2370" height="580" as="geometry" />
+        </mxCell>
+
+        <!-- Cam0 topic -->
+        <mxCell id="t_cam0" value="/safety/cam0/image/compressed&#10;━━━━━━━━━━━━&#10;오버레이 된 웹캠A 영상 JPEG&#10;BEST_EFFORT, ~15 Hz" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2A2540;strokeColor=#9080D0;fontColor=#D8CFEA;fontSize=10;align=left;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="90" y="2620" width="290" height="100" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_br_cam_t0" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#9080D0;fontColor=#D8CFEA;fontSize=11;strokeWidth=2;" edge="1" source="br_cam_encode" target="t_cam0" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxCell as="value" value="CompressedImage&#10;(cam0 JPEG)" />
+          </mxGeometry>
+          <mxCell as="value" value="CompressedImage&#10;(cam0 JPEG)" />
+        </mxCell>
+
+        <!-- Cam1 topic -->
+        <mxCell id="t_cam1" value="/safety/cam1/image/compressed&#10;━━━━━━━━━━━━&#10;오버레이 된 웹캠B 영상 JPEG&#10;BEST_EFFORT, ~15 Hz" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2A2540;strokeColor=#9080D0;fontColor=#D8CFEA;fontSize=10;align=left;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="90" y="2740" width="290" height="100" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_br_cam_t1" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#9080D0;fontColor=#D8CFEA;fontSize=11;strokeWidth=2;" edge="1" source="br_cam_encode" target="t_cam1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxCell as="value" value="CompressedImage&#10;(cam1 JPEG)" />
+          </mxGeometry>
+          <mxCell as="value" value="CompressedImage&#10;(cam1 JPEG)" />
+        </mxCell>
+
+        <!-- Emergency topics -->
+        <mxCell id="t_emg_state" value="/safety/emergency_state&#10;━━━━━━━━━━━━&#10;문자열 &quot;EMERGENCY&quot; / &quot;EMERGENCY_CLEAR&quot;&#10;RELIABLE + TRANSIENT_LOCAL" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#3A1E1E;strokeColor=#E85050;fontColor=#F8C8C8;fontSize=10;align=left;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="440" y="2620" width="310" height="100" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_br_emg_state" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#E85050;fontColor=#F8C8C8;fontSize=11;strokeWidth=2;" edge="1" source="br_emg_fire" target="t_emg_state" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxCell as="value" value="상태 문자열" />
+          </mxGeometry>
+          <mxCell as="value" value="상태 문자열" />
+        </mxCell>
+
+        <mxCell id="e_br_emg_clear" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#7EDB7E;fontColor=#B8FFB8;fontSize=11;" edge="1" source="br_emg_clear" target="t_emg_state" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxCell as="value" value="해제 문자열" />
+          </mxGeometry>
+          <mxCell as="value" value="해제 문자열" />
+        </mxCell>
+
+        <mxCell id="t_emg_goal" value="/safety/emergency_goal&#10;━━━━━━━━━━━━&#10;쓰러진 사람의 지도 좌표 (PoseStamped, map)&#10;RELIABLE + VOLATILE, 엣지 1회" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#3A1E1E;strokeColor=#E85050;fontColor=#F8C8C8;fontSize=10;align=left;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="440" y="2740" width="310" height="100" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_br_emg_goal" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#E85050;fontColor=#F8C8C8;fontSize=11;strokeWidth=2;" edge="1" source="br_emg_fire" target="t_emg_goal" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxCell as="value" value="PoseStamped&#10;(map 좌표)" />
+          </mxGeometry>
+          <mxCell as="value" value="PoseStamped&#10;(map 좌표)" />
+        </mxCell>
+
+        <!-- Helmet topics -->
+        <mxCell id="t_hlm_state" value="/safety/helmet_state&#10;━━━━━━━━━━━━&#10;문자열 &quot;NO_HELMET&quot; / &quot;HELMET_CLEAR&quot;&#10;RELIABLE + TRANSIENT_LOCAL" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#3A2E1A;strokeColor=#E89050;fontColor=#F8D8B0;fontSize=10;align=left;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="810" y="2620" width="310" height="100" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_br_hlm_state" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#E89050;fontColor=#F8D8B0;fontSize=11;strokeWidth=2;" edge="1" source="br_hlm_fire" target="t_hlm_state" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxCell as="value" value="상태 문자열" />
+          </mxGeometry>
+          <mxCell as="value" value="상태 문자열" />
+        </mxCell>
+
+        <mxCell id="e_br_hlm_clear_topic" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#7EDB7E;fontColor=#B8FFB8;fontSize=11;" edge="1" source="br_hlm_clear" target="t_hlm_state" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxCell as="value" value="해제 문자열" />
+          </mxGeometry>
+          <mxCell as="value" value="해제 문자열" />
+        </mxCell>
+
+        <mxCell id="t_hlm_goal" value="/safety/helmet_goal&#10;━━━━━━━━━━━━&#10;미착용자의 지도 좌표 (PoseStamped, map)&#10;RELIABLE + VOLATILE, 스무딩 후 ~2 Hz" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#3A2E1A;strokeColor=#E89050;fontColor=#F8D8B0;fontSize=10;align=left;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="810" y="2740" width="310" height="100" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_br_hlm_goal" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#E89050;fontColor=#F8D8B0;fontSize=11;strokeWidth=2;" edge="1" source="br_hlm_fire" target="t_hlm_goal" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxCell as="value" value="스무딩된 PoseStamped&#10;(map 좌표)" />
+          </mxGeometry>
+          <mxCell as="value" value="스무딩된 PoseStamped&#10;(map 좌표)" />
+        </mxCell>
+
+        <!-- Unauthorized topics -->
+        <mxCell id="t_uauth_state" value="/safety/unauthorized_state&#10;━━━━━━━━━━━━&#10;문자열 &quot;UNAUTHORIZED&quot; / &quot;UNAUTHORIZED_CLEAR&quot;&#10;RELIABLE + TRANSIENT_LOCAL" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#3A1E32;strokeColor=#E850B0;fontColor=#F8C8DE;fontSize=10;align=left;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="1180" y="2620" width="330" height="100" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_br_uauth_state" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#E850B0;fontColor=#F8C8DE;fontSize=11;strokeWidth=2;" edge="1" source="br_uauth_fire" target="t_uauth_state" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxCell as="value" value="상태 문자열" />
+          </mxGeometry>
+          <mxCell as="value" value="상태 문자열" />
+        </mxCell>
+
+        <mxCell id="e_br_uauth_clear_topic" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#7EDB7E;fontColor=#B8FFB8;fontSize=11;" edge="1" source="br_uauth_clear" target="t_uauth_state" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxCell as="value" value="해제 문자열" />
+          </mxGeometry>
+          <mxCell as="value" value="해제 문자열" />
+        </mxCell>
+
+        <mxCell id="t_uauth_person" value="/safety/unauthorized_person&#10;━━━━━━━━━━━━&#10;침입자의 지도 좌표 (PoseStamped, map)&#10;RELIABLE + VOLATILE, 엣지 1회" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#3A1E32;strokeColor=#E850B0;fontColor=#F8C8DE;fontSize=10;align=left;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="1180" y="2740" width="330" height="100" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_br_uauth_person" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#E850B0;fontColor=#F8C8DE;fontSize=11;strokeWidth=2;" edge="1" source="br_uauth_fire" target="t_uauth_person" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxCell as="value" value="PoseStamped&#10;(map 좌표)" />
+          </mxGeometry>
+          <mxCell as="value" value="PoseStamped&#10;(map 좌표)" />
+        </mxCell>
+
+        <!-- Persons marker topic -->
+        <mxCell id="t_persons" value="/safety/persons&#10;━━━━━━━━━━━━&#10;RViz용 MarkerArray&#10;BEST_EFFORT, 매 프레임" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1E3A20;strokeColor=#60D080;fontColor=#C8F0D0;fontSize=10;align=left;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="1570" y="2680" width="290" height="100" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_br_marker_topic" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#60D080;fontColor=#C8F0D0;fontSize=11;strokeWidth=2;" edge="1" source="br_marker" target="t_persons" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxCell as="value" value="MarkerArray&#10;(전 인원 sphere)" />
+          </mxGeometry>
+          <mxCell as="value" value="MarkerArray&#10;(전 인원 sphere)" />
+        </mxCell>
+
+        <!-- PC4 destination -->
+        <mxCell id="pc4" value="→ PC4&#10;fleet_manager, mission_orchestrator,&#10;alert_manager_emergency,&#10;web_backend, webcam_monitor" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2E2E1A;strokeColor=#D4A83B;fontColor=#F0E0A8;fontSize=12;fontStyle=1;strokeWidth=2;align=center;" vertex="1" parent="1">
+          <mxGeometry x="1930" y="2680" width="420" height="140" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_t_pc4_0" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#D4A83B;fontColor=#F0E0A8;fontSize=10;strokeWidth=2;dashed=1;" edge="1" source="t_persons" target="pc4" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxCell as="value" value="Fast DDS discovery" />
+          </mxGeometry>
+          <mxCell as="value" value="Fast DDS discovery" />
+        </mxCell>
+
+        <!-- Legend at bottom -->
+        <mxCell id="legend_group" value="범례" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#6060A0;strokeWidth=1;fontColor=#A0A0C8;fontSize=11;fontStyle=1;verticalAlign=top;align=left;spacingLeft=10;spacingTop=6;" vertex="1" parent="1">
+          <mxGeometry x="90" y="2920" width="2320" height="180" as="geometry" />
+        </mxCell>
+
+        <mxCell id="lg_1" value="■ 보라 라운드박스 — 프레임 취득 / YOLO / pose 등 인식 단계" style="text;html=1;fontColor=#D8CFEA;fontSize=11;align=left;" vertex="1" parent="1">
+          <mxGeometry x="110" y="2950" width="500" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="lg_2" value="■ 갈색 라운드박스 — H / P 를 이용한 좌표 변환" style="text;html=1;fontColor=#F0D8A8;fontSize=11;align=left;" vertex="1" parent="1">
+          <mxGeometry x="110" y="2975" width="500" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="lg_3" value="◆ 노란 마름모 — 판정 / 분기" style="text;html=1;fontColor=#F0E0A8;fontSize=11;align=left;" vertex="1" parent="1">
+          <mxGeometry x="110" y="3000" width="500" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="lg_4" value="■ 빨강 박스 — 긴급 (emergency) 관련 경보 생성" style="text;html=1;fontColor=#F8C8C8;fontSize=11;align=left;" vertex="1" parent="1">
+          <mxGeometry x="110" y="3025" width="500" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="lg_5" value="■ 주황 박스 — 헬멧 미착용 (helmet_alert) 관련" style="text;html=1;fontColor=#F8D8B0;fontSize=11;align=left;" vertex="1" parent="1">
+          <mxGeometry x="110" y="3050" width="500" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="lg_6" value="■ 진분홍 박스 — 무단 침입 (unauthorized) 관련" style="text;html=1;fontColor=#F8C8DE;fontSize=11;align=left;" vertex="1" parent="1">
+          <mxGeometry x="800" y="2950" width="500" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="lg_7" value="■ 초록 박스 — 정상 상태 / 해제 (access_granted, *_CLEAR)" style="text;html=1;fontColor=#C8F8D0;fontSize=11;align=left;" vertex="1" parent="1">
+          <mxGeometry x="800" y="2975" width="500" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="lg_8" value="■ 파랑 박스 — GlobalFuser (카메라 간 인격 통합)" style="text;html=1;fontColor=#A8DCE8;fontSize=11;align=left;" vertex="1" parent="1">
+          <mxGeometry x="800" y="3000" width="500" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="lg_9" value="■ 자주 박스 — WorkerStateStore (히스토리 스무딩)" style="text;html=1;fontColor=#F0D0F0;fontSize=11;align=left;" vertex="1" parent="1">
+          <mxGeometry x="800" y="3025" width="500" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="lg_10" value="■ 회색 점선 박스 — 참고 노트 / skip 경로" style="text;html=1;fontColor=#A0A0C8;fontSize=11;align=left;" vertex="1" parent="1">
+          <mxGeometry x="800" y="3050" width="500" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="lg_arr_1" value="→ 초록 화살표 &quot;예&quot;  |  → 빨강 화살표 &quot;아니오&quot; 또는 알림 발생  |  → 회색 화살표: 일반 데이터 흐름" style="text;html=1;fontColor=#E8E8FF;fontSize=11;fontStyle=2;align=left;" vertex="1" parent="1">
+          <mxGeometry x="110" y="3080" width="2200" height="20" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

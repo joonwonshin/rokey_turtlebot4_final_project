@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fleet FSM Monitor</title>
+<style>
+  :root {
+    --bg: #12161d;
+    --panel: #1a2029;
+    --panel-edge: #2a3342;
+    --text: #d9dee7;
+    --dim: #7d8794;
+    --normal: #2e8b46;
+    --emergency: #d03232;
+    /* fleet_fsm.py STATE_COLOR (BGR) 를 RGB 로 변환한 동일 팔레트 */
+    --c-offline: #6e6e6e;
+    --c-idle: #e6e6e6;
+    --c-nav: #50c8c8;
+    --c-emg: #ff3c3c;
+    --c-helmet: #ffa500;
+    --c-lowbat: #dcdc3c;
+    --c-charge: #50beff;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Malgun Gothic', 'Noto Sans KR', sans-serif;
+    font-size: 14px;
+    padding: 12px;
+  }
+  .mono { font-family: ui-monospace, 'Cascadia Mono', 'D2Coding', Consolas, monospace; }
+
+  /* ── 상단 상황 배너 ─────────────────────────────── */
+  #banner {
+    display: flex; align-items: center; gap: 16px;
+    padding: 10px 16px; border-radius: 6px; margin-bottom: 12px;
+    background: var(--normal); color: #fff; font-weight: 700;
+    transition: background .3s;
+  }
+  #banner.emergency { background: var(--emergency); animation: blink 1s step-end infinite; }
+  @keyframes blink { 50% { filter: brightness(1.35); } }
+  #banner .sit { font-size: 18px; letter-spacing: 1px; }
+  #banner .queues { font-weight: 400; font-size: 13px; opacity: .95; }
+  #conn {
+    margin-left: auto; font-size: 12px; font-weight: 400;
+    padding: 3px 10px; border-radius: 12px; background: rgba(0,0,0,.35);
+  }
+  #conn.ok::before  { content: '● '; color: #7CFC8a; }
+  #conn.bad::before { content: '● '; color: #ff8080; }
+
+  /* ── 레이아웃 ──────────────────────────────────── */
+  #grid { display: grid; grid-template-columns: minmax(360px, 1fr) minmax(420px, 1fr); gap: 12px; }
+  @media (max-width: 980px) { #grid { grid-template-columns: 1fr; } }
+  .panel {
+    background: var(--panel); border: 1px solid var(--panel-edge);
+    border-radius: 8px; padding: 12px;
+  }
+  .panel h2 {
+    font-size: 12px; color: var(--dim); text-transform: uppercase;
+    letter-spacing: 1.5px; margin-bottom: 10px;
+  }
+
+  /* ── 지도 캔버스 ───────────────────────────────── */
+  #map { width: 100%; background: #0c0f14; border-radius: 4px; image-rendering: pixelated; }
+  #legend { display: flex; flex-wrap: wrap; gap: 10px 16px; margin-top: 8px; font-size: 11px; color: var(--dim); }
+  #legend span::before { content: '● '; }
+
+  /* ── 로봇 카드 ─────────────────────────────────── */
+  .robot { border: 1px solid var(--panel-edge); border-radius: 6px; padding: 10px 12px; margin-bottom: 10px; }
+  .robot .head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 8px; }
+  .robot .rid { font-size: 16px; font-weight: 700; }
+  .robot .disp { font-size: 13px; font-weight: 700; }
+  .robot .batt { margin-left: auto; font-size: 13px; }
+  .batt-bar { display: inline-block; width: 70px; height: 8px; background: #2a3342; border-radius: 4px; vertical-align: middle; margin-left: 6px; overflow: hidden; }
+  .batt-bar i { display: block; height: 100%; background: var(--c-nav); }
+  .batt-bar i.low { background: var(--c-emg); }
+
+  /* FSM 상태 체인: 현재 display_state 를 점등 */
+  .fsm-chain { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 8px; }
+  .fsm-chain .st {
+    font-size: 10px; padding: 3px 7px; border-radius: 10px;
+    border: 1px solid var(--panel-edge); color: var(--dim);
+  }
+  .fsm-chain .st.on { color: #12161d; font-weight: 700; border-color: transparent; }
+
+  /* raw 토픽 배지: FSM 판단의 근거값을 그대로 노출 (디버깅 핵심) */
+  .raw { display: flex; flex-wrap: wrap; gap: 6px; font-size: 11px; }
+  .raw b { font-weight: 400; color: var(--dim); }
+  .raw .badge {
+    padding: 2px 8px; border-radius: 4px; background: #232b38; color: var(--dim);
+  }
+  .raw .badge.true { background: #1d4d2b; color: #8be3a4; }
+
+  /* ── 이벤트 주입 ───────────────────────────────── */
+  #inject { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  #inject input {
+    width: 90px; padding: 6px 8px; border-radius: 4px;
+    border: 1px solid var(--panel-edge); background: #0c0f14; color: var(--text);
+  }
+  #inject button {
+    padding: 7px 14px; border: none; border-radius: 4px;
+    font-weight: 700; cursor: pointer; color: #fff;
+  }
+  #btn-emg { background: var(--emergency); }
+  #btn-helmet { background: #c07b12; }
+  #inject button:hover { filter: brightness(1.15); }
+  #inject .hint { width: 100%; font-size: 11px; color: var(--dim); }
+
+  /* ── 이벤트 로그 ───────────────────────────────── */
+  #log { height: 220px; overflow-y: auto; font-size: 12px; line-height: 1.7; }
+  #log .row { border-bottom: 1px solid #202836; padding: 2px 0; white-space: nowrap; }
+  #log .t { color: var(--dim); margin-right: 8px; }
+  #log .topic { margin-right: 8px; font-weight: 700; }
+  #log .topic.emg { color: var(--c-emg); }
+  #log .topic.helmet { color: var(--c-helmet); }
+  #log .topic.goal { color: var(--c-charge); }
+</style>
+</head>
+<body>
+
+<div id="banner">
+  <span class="sit" id="situation">CONNECTING…</span>
+  <span class="queues" id="queues">위급 대기 - / 안전모 대기 -</span>
+  <span id="conn" class="bad">rosbridge</span>
+</div>
+
+<div id="grid">
+  <div class="panel">
+    <h2>Map · 로봇 위치 / 출동 목표</h2>
+    <canvas id="map" width="760" height="700"></canvas>
+    <div id="legend">
+      <span style="color:var(--c-idle)">IDLE</span>
+      <span style="color:var(--c-nav)">NAVIGATING(순찰 포함)</span>
+      <span style="color:var(--c-emg)">위급 출동</span>
+      <span style="color:var(--c-helmet)">안전모 확인</span>
+      <span style="color:var(--c-lowbat)">배터리 복귀</span>
+      <span style="color:var(--c-charge)">충전/도킹</span>
+      <span style="color:var(--c-offline)">OFFLINE</span>
+    </div>
+  </div>
+
+  <div>
+    <div class="panel" style="margin-bottom:12px">
+      <h2>로봇 상태 (FSM + raw 토픽)</h2>
+      <div id="robots"></div>
+    </div>
+
+    <div class="panel" style="margin-bottom:12px">
+      <h2>테스트 이벤트 주입 (ros2 topic pub 대체)</h2>
+      <div id="inject">
+        x <input id="in-x" class="mono" value="1.2">
+        y <input id="in-y" class="mono" value="-0.5">
+        robot_id <input id="in-rid" class="mono" placeholder="(자동선정)">
+        <button id="btn-emg">위급 발행 /alert/emergency</button>
+        <button id="btn-helmet">안전모 발행 /alert/helmet</button>
+        <span class="hint">robot_id 를 비우면 fleet_fsm 이 최근접 유휴 로봇을 자동 선정합니다.</span>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>토픽 이벤트 로그 (최신순)</h2>
+      <div id="log" class="mono"></div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/roslib@1/build/roslib.min.js"></script>
+<script>
+/* =====================================================================
+ * 설정 — fleet_fsm.py 상수와 일치시킬 것
+ * ===================================================================== */
+const CONFIG = {
+  ROSBRIDGE_URL: 'ws://localhost:9090',
+  ROBOTS: ['robot2', 'robot9'],          // fleet_fsm.ROBOTS 와 동일
+  // 지도: map.pgm 을 png 로 변환해 이 html 과 같은 폴더에서 서빙하면 배경으로 표시.
+  //   convert final_project.pgm map.png   (또는 GIMP 등)
+  //   python3 -m http.server 8000  →  http://localhost:8000/fleet_monitor.html
+  // 파일이 없으면 회색 격자 캔버스로 동작 (fleet_fsm 의 blank canvas 폴백과 동일)
+  MAP_IMAGE: 'map.png',
+  MAP_RESOLUTION: 0.05,                  // map.yaml resolution
+  MAP_ORIGIN: [-5.23, -1.38, 0],              // map.yaml origin[0..1]
+  MAP_SIZE_PX: [201, 241],               // pgm 원본 크기 (w, h) — 이미지 로드 성공 시 자동 대체
+  BATTERY_LOW: 0.25,
+};
+
+const STATE_COLOR = {
+  OFFLINE: '#6e6e6e', IDLE: '#e6e6e6', NAVIGATING: '#50c8c8',
+  DISPATCHING_EMERGENCY: '#ff3c3c', DISPATCHING_HELMET: '#ffa500',
+  RETURNING_LOW_BATTERY: '#dcdc3c', CHARGING: '#50beff', DOCKED: '#50beff',
+};
+const KR_STATE = {
+  OFFLINE: '오프라인', IDLE: '대기', NAVIGATING: '이동 중(순찰 포함)',
+  DISPATCHING_EMERGENCY: '위급 출동 중', DISPATCHING_HELMET: '안전모 확인 이동 중',
+  RETURNING_LOW_BATTERY: '배터리부족 복귀 중', CHARGING: '도킹(충전 중)', DOCKED: '도킹',
+};
+const FSM_CHAIN = ['OFFLINE', 'IDLE', 'NAVIGATING', 'DISPATCHING_EMERGENCY',
+                   'DISPATCHING_HELMET', 'RETURNING_LOW_BATTERY', 'CHARGING'];
+
+/* =====================================================================
+ * rosbridge 연결
+ * ===================================================================== */
+const ros = new ROSLIB.Ros({ url: CONFIG.ROSBRIDGE_URL });
+const connEl = document.getElementById('conn');
+ros.on('connection', () => { connEl.textContent = 'rosbridge 연결됨'; connEl.className = 'ok'; });
+ros.on('close', () => {
+  connEl.textContent = 'rosbridge 끊김 — 5초 후 재연결'; connEl.className = 'bad';
+  setTimeout(() => ros.connect(CONFIG.ROSBRIDGE_URL), 5000);
+});
+ros.on('error', () => { connEl.textContent = 'rosbridge 오류'; connEl.className = 'bad'; });
+
+const topic = (name, type) =>
+  new ROSLIB.Topic({ ros, name, messageType: type });
+
+/* ── 구독 1: 관제 노드가 발행하는 FSM 종합 상태 (권위 소스) ───────── */
+let fleet = null;   // 마지막 수신한 /fleet/status JSON
+topic('/fleet/status', 'std_msgs/String').subscribe(msg => {
+  try { fleet = JSON.parse(msg.data); } catch (e) { return; }
+  renderRobots(); renderBanner(); drawMap();
+});
+
+/* ── 구독 2: raw 이벤트 토픽 — 로그 패널에 원문 그대로 표시 ──────── */
+function logRow(cls, name, data) {
+  const log = document.getElementById('log');
+  const row = document.createElement('div');
+  row.className = 'row';
+  const t = new Date().toLocaleTimeString('ko-KR', { hour12: false });
+  row.innerHTML = `<span class="t">${t}</span>` +
+                  `<span class="topic ${cls}">${name}</span>` +
+                  `<span>${data}</span>`;
+  log.prepend(row);
+  while (log.childElementCount > 200) log.lastChild.remove();
+}
+topic('/alert/emergency', 'std_msgs/String')
+  .subscribe(m => logRow('emg', '/alert/emergency', m.data));
+topic('/alert/helmet', 'std_msgs/String')
+  .subscribe(m => logRow('helmet', '/alert/helmet', m.data));
+for (const rid of CONFIG.ROBOTS) {
+  topic(`/${rid}/emergency_goal`, 'std_msgs/String')
+    .subscribe(m => logRow('goal', `/${rid}/emergency_goal`, m.data));
+}
+
+/* ── 발행: 브라우저에서 테스트 이벤트 주입 ───────────────────────── */
+const emgPub = topic('/alert/emergency', 'std_msgs/String');
+const helmetPub = topic('/alert/helmet', 'std_msgs/String');
+function inject(pub) {
+  const x = parseFloat(document.getElementById('in-x').value);
+  const y = parseFloat(document.getElementById('in-y').value);
+  if (isNaN(x) || isNaN(y)) { alert('x, y 는 숫자여야 합니다'); return; }
+  const payload = { x, y };
+  const rid = document.getElementById('in-rid').value.trim();
+  if (rid && pub === emgPub) payload.robot_id = rid;   // 지정 출동은 위급만 지원
+  pub.publish(new ROSLIB.Message({ data: JSON.stringify(payload) }));
+}
+document.getElementById('btn-emg').onclick = () => inject(emgPub);
+document.getElementById('btn-helmet').onclick = () => inject(helmetPub);
+
+/* =====================================================================
+ * 렌더링
+ * ===================================================================== */
+function renderBanner() {
+  const banner = document.getElementById('banner');
+  const emg = fleet.situation === 'EMERGENCY';
+  banner.classList.toggle('emergency', emg);
+  document.getElementById('situation').textContent =
+    emg ? 'EMERGENCY · 위급상황' : 'NORMAL · 평시';
+  document.getElementById('queues').textContent =
+    `위급 대기 ${fleet.emergency_queue.length} / 안전모 대기 ${fleet.helmet_queue.length}`;
+}
+
+function renderRobots() {
+  const root = document.getElementById('robots');
+  root.innerHTML = '';
+  for (const [rid, r] of Object.entries(fleet.robots)) {
+    const color = STATE_COLOR[r.display_state] || '#fff';
+    const battPct = r.battery != null ? (r.battery * 100).toFixed(0) : null;
+    const low = r.battery != null && r.battery < CONFIG.BATTERY_LOW;
+    const pose = r.pose ? `(${r.pose[0].toFixed(2)}, ${r.pose[1].toFixed(2)})` : '(?, ?)';
+    const age = r.last_seen_age != null ? r.last_seen_age.toFixed(1) + 's' : '—';
+
+    const chain = FSM_CHAIN.map(s => {
+      const on = s === r.display_state ||
+                 (s === 'CHARGING' && r.display_state === 'DOCKED');
+      return `<span class="st ${on ? 'on' : ''}" ` +
+             `style="${on ? 'background:' + (STATE_COLOR[s]||'#fff') : ''}">${s}</span>`;
+    }).join('');
+
+    const badge = (label, val) =>
+      `<span class="badge ${val ? 'true' : ''}">${label}=${val}</span>`;
+
+    const card = document.createElement('div');
+    card.className = 'robot';
+    card.innerHTML = `
+      <div class="head">
+        <span class="rid">${rid}</span>
+        <span class="disp" style="color:${color}">
+          ${r.display_state} · ${KR_STATE[r.display_state] || ''}</span>
+        <span class="batt mono">${battPct !== null ? battPct + '%' : '?'}
+          <span class="batt-bar"><i class="${low ? 'low' : ''}"
+            style="width:${battPct ?? 0}%"></i></span></span>
+      </div>
+      <div class="fsm-chain">${chain}</div>
+      <div class="raw mono">
+        ${badge('docked', r.docked)} ${badge('navigating', r.navigating)}
+        ${badge('seen_moving', r.dispatch_seen_moving)}
+        <span class="badge">reported=${r.reported_state ?? '—'}</span>
+        <span class="badge">pose ${pose}</span>
+        <span class="badge">last_seen ${age}</span>
+        ${r.dispatch_goal ? `<span class="badge" style="color:${color}">goal (${r.dispatch_goal[0].toFixed(2)}, ${r.dispatch_goal[1].toFixed(2)}) ${r.dispatch_reason}</span>` : ''}
+      </div>`;
+    root.appendChild(card);
+  }
+}
+
+/* ── 지도 캔버스: fleet_fsm.world_to_px 를 JS 로 동일 구현 ─────────── */
+const canvas = document.getElementById('map');
+const ctx = canvas.getContext('2d');
+let mapImg = null, mapW = CONFIG.MAP_SIZE_PX[0], mapH = CONFIG.MAP_SIZE_PX[1];
+{
+  const img = new Image();
+  img.onload = () => { mapImg = img; mapW = img.width; mapH = img.height; drawMap(); };
+  img.src = CONFIG.MAP_IMAGE;   // 실패해도 무시 → 격자 폴백
+}
+function worldToPx(x, y) {
+  const scale = Math.min(canvas.width / mapW, canvas.height / mapH);
+  let px = (x - CONFIG.MAP_ORIGIN[0]) / CONFIG.MAP_RESOLUTION;
+  let py = mapH - 1 - (y - CONFIG.MAP_ORIGIN[1]) / CONFIG.MAP_RESOLUTION;
+  px = Math.min(Math.max(px, 0), mapW - 1);   // 지도 밖 좌표 클램프 (원본과 동일)
+  py = Math.min(Math.max(py, 0), mapH - 1);
+  return [px * scale, py * scale];
+}
+function marker(x, y, color) {   // OpenCV MARKER_TILTED_CROSS 재현
+  ctx.strokeStyle = color; ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(x - 9, y - 9); ctx.lineTo(x + 9, y + 9);
+  ctx.moveTo(x + 9, y - 9); ctx.lineTo(x - 9, y + 9);
+  ctx.stroke();
+}
+function drawMap() {
+  ctx.fillStyle = '#0c0f14';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  const scale = Math.min(canvas.width / mapW, canvas.height / mapH);
+  if (mapImg) {
+    ctx.imageSmoothingEnabled = false;
+    ctx.globalAlpha = 0.55;
+    ctx.drawImage(mapImg, 0, 0, mapW * scale, mapH * scale);
+    ctx.globalAlpha = 1;
+  } else {                                        // 격자 폴백
+    ctx.strokeStyle = '#1e2632'; ctx.lineWidth = 1;
+    const grid = 1.0 / CONFIG.MAP_RESOLUTION * scale;   // 1 m 격자
+    for (let gx = 0; gx < mapW * scale; gx += grid) {
+      ctx.beginPath(); ctx.moveTo(gx, 0); ctx.lineTo(gx, mapH * scale); ctx.stroke();
+    }
+    for (let gy = 0; gy < mapH * scale; gy += grid) {
+      ctx.beginPath(); ctx.moveTo(0, gy); ctx.lineTo(mapW * scale, gy); ctx.stroke();
+    }
+  }
+  if (!fleet) return;
+
+  // 미배정 이벤트 지점
+  for (const e of fleet.emergency_queue) marker(...worldToPx(e.x, e.y), '#ff3c3c');
+  for (const h of fleet.helmet_queue) {
+    const [px, py] = worldToPx(h.x, h.y);
+    ctx.strokeStyle = '#ffa500'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(px, py, 10, 0, Math.PI * 2); ctx.stroke();
+  }
+
+  // 로봇 + 출동 목표 연결선
+  for (const [rid, r] of Object.entries(fleet.robots)) {
+    const color = STATE_COLOR[r.display_state] || '#fff';
+    if (r.dispatch_goal) {
+      const gp = worldToPx(r.dispatch_goal[0], r.dispatch_goal[1]);
+      const gc = r.dispatch_reason === 'EMERGENCY' ? '#ff3c3c' : '#ffa500';
+      marker(gp[0], gp[1], gc);
+      if (r.pose) {
+        const pp = worldToPx(r.pose[0], r.pose[1]);
+        ctx.strokeStyle = gc; ctx.lineWidth = 1; ctx.setLineDash([6, 4]);
+        ctx.beginPath(); ctx.moveTo(pp[0], pp[1]); ctx.lineTo(gp[0], gp[1]); ctx.stroke();
+        ctx.setLineDash([]);
+      }
+    }
+    if (!r.pose) continue;
+    const [px, py] = worldToPx(r.pose[0], r.pose[1]);
+    ctx.fillStyle = color;
+    ctx.beginPath(); ctx.arc(px, py, 11, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#12161d'; ctx.lineWidth = 2; ctx.stroke();
+    ctx.fillStyle = color; ctx.font = 'bold 13px monospace';
+    ctx.fillText(rid.replace('robot', 'R'), px - 10, py - 16);
+  }
+}
+drawMap();
+</script>
+</body>
+</html>
