@@ -17,6 +17,9 @@
 rosbridge 기반 웹 대시보드에서 로봇과 작업자의 위치, **출동 로봇이 선정된 근거**, 소화기
 점검 현황을 실시간으로 확인할 수 있습니다.
 
+> 원본 저장소: [smileswc/amr_vision](https://github.com/smileswc/amr_vision) — 이 저장소는
+> 원본을 클론해 colcon 워크스페이스 구조로 개편하고 문서를 재작성한 것입니다.
+
 ---
 
 ## 1. 주요 기능
