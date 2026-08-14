@@ -12,13 +12,19 @@
 
 set +u   # ROS 의 setup.bash 는 set -u 와 함께 못 쓴다 (AMENT_TRACE_SETUP_FILES)
 
-BASE="$HOME/turtlebot4_ws/final_project"
+# 이 스크립트가 놓인 자리 = 저장소 루트 = colcon 워크스페이스.
+# 절대경로를 박아두면 클론한 PC 마다 깨지므로 스크립트 위치 기준으로 잡는다.
+BASE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 LOG="$BASE/.logs"
 mkdir -p "$LOG"
 
 # ── ROS 환경 ────────────────────────────────────────────────────────
 source /opt/ros/humble/setup.bash
-source "$HOME/turtlebot4_ws/install/setup.bash"
+if [ ! -f "$BASE/install/setup.bash" ]; then
+  echo "❌ $BASE/install 이 없다. 먼저 빌드할 것:  cd $BASE && colcon build"
+  exit 1
+fi
+source "$BASE/install/setup.bash"
 
 export RMW_IMPLEMENTATION=rmw_fastrtps_cpp
 export ROS_DOMAIN_ID=6
@@ -124,7 +130,7 @@ sleep 5
 # http 로 서빙하면 html 이 '서빙한 호스트'의 9090 을 자동으로 찾아간다.
 echo "[4/5] 웹 대시보드 (포트 8000)"
 setsid python3 -m http.server 8000 \
-       --directory "$BASE/fp_amr_fsm_connec_vision/fp_amr_fsm/web" \
+       --directory "$BASE/src/fp_amr_fsm/web" \
        > "$LOG/webserver.log" 2>&1 < /dev/null &
 sleep 1
 MYIP=$(ip -4 addr show wlo1 2>/dev/null | grep -o 'inet [0-9.]*' | awk '{print $2}')
@@ -138,7 +144,7 @@ echo "  웹(이 PC / PC4 공통): http://${MYIP:-localhost}:8000/fleet_monitor.h
 echo "  종료: 감지 창에서 'q'  →  그 다음 ./start.sh --stop"
 echo
 
-cd "$BASE/detection_final"
+cd "$BASE/vision_pc3"
 exec python3 12_dual_camera_entry_yolo_tracking_modular.py \
      --cam0-id "${cam0#/dev/video}" \
      --cam1-id "${cam1#/dev/video}" \

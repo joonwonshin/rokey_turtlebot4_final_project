@@ -1,0 +1,82 @@
+[
+  {
+    "marker_id": 0,
+    "location_x": 2.39,
+    "location_y": -1.31,
+    "manufacture_date": "2015-01-20",
+    "pressure_status": "normal",
+    "result": "TBD"
+  },
+  {
+    "marker_id": 1,
+    "location_x": -3.25,
+    "location_y": 0.69,
+    "manufacture_date": "2020-10-13",
+    "pressure_status": "low",
+    "result": "TBD"
+  },
+  {
+    "marker_id": 2,
+    "location_x": 0.86,
+    "location_y": 3.48,
+    "manufacture_date": "2018-08-16",
+    "pressure_status": "normal",
+    "result": "TBD"
+  },
+  {
+    "marker_id": 3,
+    "location_x": -1.49,
+    "location_y": -2.94,
+    "manufacture_date": "2016-05-27",
+    "pressure_status": "normal",
+    "result": "TBD"
+  },
+  {
+    "marker_id": 4,
+    "location_x": 4.31,
+    "location_y": 1.11,
+    "manufacture_date": "2021-03-04",
+    "pressure_status": "normal",
+    "result": "TBD"
+  },
+  {
+    "marker_id": 5,
+    "location_x": -4.12,
+    "location_y": 2.57,
+    "manufacture_date": "2017-12-19",
+    "pressure_status": "normal",
+    "result": "TBD"
+  },
+  {
+    "marker_id": 6,
+    "location_x": 1.29,
+    "location_y": -4.30,
+    "manufacture_date": "2022-09-22",
+    "pressure_status": "high",
+    "result": "TBD"
+  },
+  {
+    "marker_id": 7,
+    "location_x": 3.81,
+    "location_y": 3.02,
+    "manufacture_date": "2023-06-14",
+    "pressure_status": "normal",
+    "result": "TBD"
+  },
+  {
+    "marker_id": 8,
+    "location_x": -0.41,
+    "location_y": -3.43,
+    "manufacture_date": "2014-07-08",
+    "pressure_status": "normal",
+    "result": "TBD"
+  },
+  {
+    "marker_id": 9,
+    "location_x": -2.98,
+    "location_y": 4.24,
+    "manufacture_date": "2024-02-26",
+    "pressure_status": "normal",
+    "result": "TBD"
+  }
+]

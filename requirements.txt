@@ -1,0 +1,28 @@
+# 산업안전 AMR 관제 시스템 — Python 의존성
+#
+#   pip3 install -r requirements.txt
+#
+# ⚠ 이 파일에는 pip 로 까는 것만 넣었다.
+#   rclpy / cv_bridge / nav2_simple_commander / turtlebot4_navigation 등
+#   ROS 2 패키지는 pip 가 아니라 apt 로 깐다 (아래 "ROS 2 의존성" 참고).
+
+# ── 비전 감지 (vision_pc3/, calibration_tools/) ──────────────────
+ultralytics>=8.1.0        # YOLO11-pose 자세 추정 + 안전모 검출 (torch 를 함께 끌고 온다)
+opencv-python>=4.8.0      # 카메라 캡처, 호모그래피, 대시보드 렌더링
+numpy>=1.24.0,<2.0.0      # 좌표 변환 전반. ROS 2 Humble 이 numpy 1.x 라 2.0 은 피한다
+
+# ── 공통 ─────────────────────────────────────────────────────────
+PyYAML>=6.0               # SLAM 맵 yaml, 파라미터 파일 파싱
+
+# ── DB / 웹 (src/sqlite3db/) ─────────────────────────────────────
+Flask>=2.3.0              # 점검 결과 조회 웹
+openpyxl>=3.1.0           # 초기 데이터 xlsx 적재
+# sqlite3 는 파이썬 표준 라이브러리라 설치할 것이 없다.
+
+# ── ROS 2 의존성 (pip 아님 — apt 로 설치) ────────────────────────
+#   sudo apt install ros-humble-rosbridge-server \
+#                    ros-humble-cv-bridge \
+#                    ros-humble-nav2-simple-commander \
+#                    ros-humble-turtlebot4-navigation \
+#                    ros-humble-irobot-create-msgs \
+#                    ros-humble-tf-transformations

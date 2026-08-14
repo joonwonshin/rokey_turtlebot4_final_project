@@ -7,14 +7,16 @@ __pycache__/
 build/
 install/
 log/
+# start.sh 가 백그라운드 프로세스 로그를 쌓는 곳
+.logs/
 
 # ── 런타임 산출물 ─────────────────────────
 # 감지 노드가 상태 JSON 을 쓰는 곳 (폴더 구조는 .keep 으로 유지)
-outputs/*
-!outputs/.keep
+vision_pc3/outputs/*
+!vision_pc3/outputs/.keep
 # ros2_db_node / db_update 가 이미지를 쌓는 곳
-2_ros2_packages/sqlite3db/sqlite3db/camera_frames/*.jpg
-2_ros2_packages/sqlite3db/sqlite3db/camera_frames/snapshots/*.jpg
+src/sqlite3db/sqlite3db/camera_frames/*.jpg
+src/sqlite3db/sqlite3db/camera_frames/snapshots/*.jpg
 
 # ── 편집기/OS ─────────────────────────────
 .vscode/
