@@ -2,12 +2,12 @@
 
 TurtleBot4 AMR 관제(FSM) 패키지 — PC4에서 실행되는 **fleet 관제 노드**, **PC3 감지 시스템 연동 브릿지**, **로봇 구동(순찰/출동) 노드**를 담는다.
 
-(구 패키지명 `fp_amr_vision` 에서 변경. vision 처리는 별도 `detection_final` 이 담당하고, 이 패키지는 상태머신/관제가 중심이므로 fsm 으로 개명.)
+(구 패키지명 `fp_amr_vision` 에서 변경. vision 처리는 별도 `vision_pc3/` 가 담당하고, 이 패키지는 상태머신/관제가 중심이므로 fsm 으로 개명.)
 
 ## 시스템 구성
 
 ```
-[PC3: detection_final]                [PC4: fp_amr_fsm]                   [로봇: robot2/robot9]
+[PC3: vision_pc3]                [PC4: fp_amr_fsm]                   [로봇: robot2/robot9]
  웹캠 2대 YOLO 감지        /safety/*   safety_alert_bridge    /alert/*     amr_patrol_emer_helmet
  (쓰러짐/헬멧/무단침입) ──PoseStamped──▶ (타입/이름 변환)  ──String JSON──▶ fleet_fsm ──/{robot}/*──▶ (순찰·출동 실행)
 ```
@@ -50,7 +50,7 @@ TurtleBot4 AMR 관제(FSM) 패키지 — PC4에서 실행되는 **fleet 관제 �
 
 ### 2. `safety_alert_bridge` — PC3 연동 브릿지 (PC4)
 
-detection_final(PC3)의 `/safety/*` (PoseStamped/String)를 fleet_fsm의 `/alert/*` (String JSON)로 변환.
+vision_pc3(PC3)의 `/safety/*` (PoseStamped/String)를 fleet_fsm의 `/alert/*` (String JSON)로 변환.
 
 | 입력 (PC3) | 출력 (fleet_fsm) | 비고 |
 |---|---|---|
@@ -105,7 +105,7 @@ python3 -m http.server 8000   # → http://localhost:8000/fleet_monitor.html
 ## 빌드 및 실행
 
 ```bash
-cd ~/turtlebot4_ws
+cd ~/rokey_turtlebot4_final_project
 colcon build --packages-select fp_amr_fsm --symlink-install
 source install/setup.bash
 
@@ -117,7 +117,7 @@ ros2 run fp_amr_fsm safety_alert_bridge
 ros2 run fp_amr_fsm amr_patrol_emer_helmet --ros-args -r __ns:=/robot2
 ```
 
-PC3에서는 `detection_final/12_dual_camera_entry_yolo_tracking_modular.py` 실행 (ROS 발행 기본 ON).
+PC3에서는 `vision_pc3/12_dual_camera_entry_yolo_tracking_modular.py` 실행 (ROS 발행 기본 ON).
 
 ## 시연/디버깅용 수동 주입
 

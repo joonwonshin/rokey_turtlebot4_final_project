@@ -20,21 +20,26 @@ import cv2
 import numpy as np
 import yaml
 
-BASE = Path.home() / "turtlebot4_ws" / "final_project"
+# 저장소 루트 기준으로 잡는다. 이 스크립트는 calibration_tools/ 안에 있다.
+# (예전에는 ~/turtlebot4_ws/final_project 가 하드코딩돼 있어 다른 PC 에서 깨졌다.)
+REPO_DIR = Path(__file__).resolve().parents[1]
+VISION_DIR = REPO_DIR / "vision_pc3"   # 모델·캘리브레이션·맵이 사는 곳
+BASE = REPO_DIR                      # captures/ dataset/ 등 작업용 산출물
 
 ap = argparse.ArgumentParser()
 ap.add_argument("--cam", required=True, choices=["cam0", "cam1"])
 ap.add_argument("--device", type=int, required=True)
 ap.add_argument("--live", action="store_true")
-ap.add_argument("--detection", action="store_true", help="detection_final/calibration 사용")
+ap.add_argument("--detection", action="store_true",
+                help="구 옵션. 캘리브 폴더가 vision_pc3/calibration 하나로 통합되어 무시된다")
 cli = ap.parse_args()
 
-CAL = BASE / ("detection_final/calibration" if cli.detection else "calibration")
+CAL = VISION_DIR / "calibration"   # 구 detection_final/ = 현 vision_pc3/ 로 통합됨
 
-y = yaml.safe_load(open(BASE / "final_project.yaml"))
+y = yaml.safe_load(open(VISION_DIR / "final_project.yaml"))
 res = float(y["resolution"])
 ox, oy, _ = y["origin"]
-g = cv2.imread(str(BASE / "final_project.pgm"), cv2.IMREAD_GRAYSCALE)
+g = cv2.imread(str(VISION_DIR / "final_project.pgm"), cv2.IMREAD_GRAYSCALE)
 h, w = g.shape
 
 occ = np.argwhere(g < 100)                       # 벽 셀 (row, col)

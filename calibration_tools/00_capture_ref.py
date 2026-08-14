@@ -21,7 +21,11 @@ from pathlib import Path
 
 import cv2
 
-BASE = Path.home() / "turtlebot4_ws" / "final_project"
+# 저장소 루트 기준으로 잡는다. 이 스크립트는 calibration_tools/ 안에 있다.
+# (예전에는 ~/turtlebot4_ws/final_project 가 하드코딩돼 있어 다른 PC 에서 깨졌다.)
+REPO_DIR = Path(__file__).resolve().parents[1]
+VISION_DIR = REPO_DIR / "vision_pc3"   # 모델·캘리브레이션·맵이 사는 곳
+BASE = REPO_DIR                      # captures/ dataset/ 등 작업용 산출물
 
 ap = argparse.ArgumentParser()
 ap.add_argument("camera", choices=["cam0", "cam1"])

@@ -296,7 +296,7 @@ ros.on('error', () => { connEl.textContent = 'rosbridge 오류'; connEl.classNam
 const topic = (name, type) =>
   new ROSLIB.Topic({ ros, name, messageType: type });
 
-/* PC3(detection_final) 의 사람 상태별 색상.
+/* PC3(vision_pc3) 의 사람 상태별 색상.
    대시보드 / RViz 마커와 동일한 우선순위·색으로 맞춘다. */
 const PERSON_COLOR = {
   EMERGENCY:    '#ff2020',   // 빨강 (점멸)

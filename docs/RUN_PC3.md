@@ -21,7 +21,7 @@ PC3 (이 PC 하나가 전부)
 
 ```bash
 source /opt/ros/humble/setup.bash
-source ~/turtlebot4_ws/install/setup.bash
+source ~/rokey_turtlebot4_final_project/install/setup.bash
 export RMW_IMPLEMENTATION=rmw_fastrtps_cpp
 export ROS_DOMAIN_ID=6
 export ROS_DISCOVERY_SERVER=";;192.168.107.102:11811;;;;;;;192.168.107.109:11811"
@@ -56,14 +56,14 @@ ros2 topic list      # 첫 조회가 비면 한 번 더 (데몬이 discovery 동
 # 터미널 A — robot2
 ros2 launch turtlebot4_navigation localization.launch.py \
   namespace:=/robot2 \
-  map:=$HOME/turtlebot4_ws/final_project/fp_amr_fsm_connec_vision/fp_amr_fsm/maps/final_project.yaml
+  map:=$HOME/rokey_turtlebot4_final_project/src/fp_amr_fsm/maps/final_project.yaml
 ```
 
 ```bash
 # 터미널 B — robot9
 ros2 launch turtlebot4_navigation localization.launch.py \
   namespace:=/robot9 \
-  map:=$HOME/turtlebot4_ws/final_project/fp_amr_fsm_connec_vision/fp_amr_fsm/maps/final_project.yaml
+  map:=$HOME/rokey_turtlebot4_final_project/src/fp_amr_fsm/maps/final_project.yaml
 ```
 
 ### ⚠️ initial pose 를 반드시 잡아줄 것
@@ -140,13 +140,13 @@ ros2 topic echo -1 /robot2/amcl_pose --qos-durability transient_local
 ## 4. 감지 + 관제 + 웹 (터미널 1개)
 
 ```bash
-cd ~/turtlebot4_ws/final_project
+cd ~/rokey_turtlebot4_final_project
 ./start.sh
 ```
 rosbridge + fleet_fsm + safety_alert_bridge + 웹캠 감지 를 한 번에 띄운다.
 감지 창은 **`q`** 로 종료 (강제종료 금지 — cam1 이 먹통이 된다).
 
-**웹:** `fp_amr_fsm_connec_vision/fp_amr_fsm/web/fleet_monitor.html` 을 크롬에 끌어다 놓기.
+**웹:** `src/fp_amr_fsm/web/fleet_monitor.html` 을 크롬에 끌어다 놓기.
 
 ---
 
@@ -195,7 +195,7 @@ ros2 topic echo /robot2/emergency_clear --qos-durability transient_local
 ## 6. 전부 종료
 
 ```bash
-cd ~/turtlebot4_ws/final_project && ./start.sh --stop
+cd ~/rokey_turtlebot4_final_project && ./start.sh --stop
 ```
 localization / nav2 / amr_patrol 은 각 터미널에서 `Ctrl+C`.
 

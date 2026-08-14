@@ -75,7 +75,7 @@ DOCK_POSITIONS = {
 다른 맵이면 좌표가 어긋나 엉뚱한 곳으로 갑니다.
 
 ```
-fp_amr_fsm/maps/final_project.yaml
+src/fp_amr_fsm/maps/final_project.yaml
   image: final_project.pgm
   resolution: 0.05
   origin: [-5.23, -1.38, 0]
@@ -84,7 +84,7 @@ fp_amr_fsm/maps/final_project.yaml
 ```bash
 ros2 launch turtlebot4_navigation localization.launch.py \
   namespace:=/robot2 \
-  map:=<경로>/fp_amr_fsm/maps/final_project.yaml
+  map:=<경로>/src/fp_amr_fsm/maps/final_project.yaml
 ```
 
 ---
@@ -110,7 +110,7 @@ ros2 topic echo -1 /robot2/amcl_pose --qos-durability transient_local
 ```bash
 # 공통 환경
 source /opt/ros/humble/setup.bash
-source ~/turtlebot4_ws/install/setup.bash
+source ~/rokey_turtlebot4_final_project/install/setup.bash
 export RMW_IMPLEMENTATION=rmw_fastrtps_cpp
 export ROS_DOMAIN_ID=6
 export ROS_DISCOVERY_SERVER=";;192.168.107.102:11811;;;;;;;192.168.107.109:11811"
@@ -119,7 +119,7 @@ export ROS_SUPER_CLIENT=True
 
 ```bash
 # 로봇당 3개 터미널
-MAP=~/turtlebot4_ws/src/fp_amr_fsm/maps/final_project.yaml
+MAP=~/rokey_turtlebot4_final_project/src/fp_amr_fsm/maps/final_project.yaml
 
 ros2 launch turtlebot4_navigation localization.launch.py namespace:=/robot2 map:=$MAP
 ros2 launch turtlebot4_navigation nav2.launch.py         namespace:=/robot2

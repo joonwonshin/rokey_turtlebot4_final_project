@@ -2,7 +2,7 @@
 캘리브레이션 검증. H / P / Entry ROI 를 한 번에 점검한다.
 
   python3 verify_calib.py              # calibration/ (작업본)
-  python3 verify_calib.py --detection  # detection_final/calibration/ (실행본)
+  python3 verify_calib.py --detection  # (구 옵션 — 이제 무시된다)
   python3 verify_calib.py --cam cam0
 
 검사 항목:
@@ -23,15 +23,20 @@ from pathlib import Path
 import cv2
 import numpy as np
 
-BASE = Path.home() / "turtlebot4_ws" / "final_project"
+# 저장소 루트 기준으로 잡는다. 이 스크립트는 calibration_tools/ 안에 있다.
+# (예전에는 ~/turtlebot4_ws/final_project 가 하드코딩돼 있어 다른 PC 에서 깨졌다.)
+REPO_DIR = Path(__file__).resolve().parents[1]
+VISION_DIR = REPO_DIR / "vision_pc3"   # 모델·캘리브레이션·맵이 사는 곳
+BASE = REPO_DIR                      # captures/ dataset/ 등 작업용 산출물
 
 ap = argparse.ArgumentParser()
-ap.add_argument("--detection", action="store_true", help="detection_final/calibration 검사")
+ap.add_argument("--detection", action="store_true",
+                help="구 옵션. 캘리브 폴더가 vision_pc3/calibration 하나로 통합되어 무시된다")
 ap.add_argument("--cam", nargs="+", default=["cam0", "cam1"])
 cli = ap.parse_args()
 
-CAL = BASE / ("detection_final/calibration" if cli.detection else "calibration")
-ROI = BASE / "detection_final/calibration/entry_roi.json"
+CAL = VISION_DIR / "calibration"   # 구 detection_final/ = 현 vision_pc3/ 로 통합됨
+ROI = VISION_DIR / "calibration" / "entry_roi.json"
 
 print(f"검사 대상: {CAL}")
 
@@ -108,7 +113,7 @@ for cam in cli.cam:
     dv = np.abs(pred[:, 1] - ip[:, 1])
 
     # 실제 판정 코드로 head_z 를 다시 풀어 참값(height_m)과 비교 = 진짜 지표
-    sys.path.insert(0, str(BASE / "detection_final"))
+    sys.path.insert(0, str(VISION_DIR))
     from safety_lib import base_utils as bu
     hm = float(z["height_m"][0])
     zs = []

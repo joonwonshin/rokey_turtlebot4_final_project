@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-PC3(detection_final) → fleet_fsm 토픽 브릿지 노드.
+PC3(vision_pc3) → fleet_fsm 토픽 브릿지 노드.
 
-detection_final 의 SafetyRosBridge 는 map 좌표를 geometry_msgs/PoseStamped 로
+vision_pc3 의 SafetyRosBridge 는 map 좌표를 geometry_msgs/PoseStamped 로
 /safety/* 토픽에 발행하지만, fleet_fsm 은 std_msgs/String(JSON {"x","y"}) 을
 /alert/* 토픽으로 기대한다. 양쪽 코드를 건드리지 않고 이 노드가 중간에서
 타입/이름을 변환한다.

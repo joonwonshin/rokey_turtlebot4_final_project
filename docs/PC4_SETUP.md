@@ -119,7 +119,7 @@ ros2 topic echo /fleet/status
 
 **PC3 에서 한 방에 전부 확인:**
 ```bash
-cd ~/turtlebot4_ws/final_project
+cd ~/rokey_turtlebot4_final_project
 python3 check_web.py --cam
 ```
 (rosbridge 웹소켓으로 확인 — 브라우저가 보는 것과 완전히 동일한 경로)
@@ -139,7 +139,7 @@ ros2 run fp_amr_fsm safety_alert_bridge
 ros2 launch rosbridge_server rosbridge_websocket_launch.xml
 ```
 
-웹: `fp_amr_fsm/web/fleet_monitor.html` 을 크롬으로 **그냥 열면 된다** (로컬 서버 불필요).
+웹: `src/fp_amr_fsm/web/fleet_monitor.html` 을 크롬으로 **그냥 열면 된다** (로컬 서버 불필요).
 `ws://localhost:9090` 으로 붙으므로 **rosbridge 와 같은 PC** 에서 열어야 한다.
 다른 PC 에서 열려면 HTML 의 `CONFIG.ROSBRIDGE_URL` 을 `ws://<PC4-IP>:9090` 으로 고친다.
 

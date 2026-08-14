@@ -14,6 +14,9 @@ log/
 # 감지 노드가 상태 JSON 을 쓰는 곳 (폴더 구조는 .keep 으로 유지)
 vision_pc3/outputs/*
 !vision_pc3/outputs/.keep
+# calibration_tools 가 캘리브 작업 중에 쌓는 중간 산출물 (저장소 루트에 생긴다)
+captures/
+dataset/
 # ros2_db_node / db_update 가 이미지를 쌓는 곳
 src/sqlite3db/sqlite3db/camera_frames/*.jpg
 src/sqlite3db/sqlite3db/camera_frames/snapshots/*.jpg

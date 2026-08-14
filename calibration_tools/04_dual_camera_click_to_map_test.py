@@ -5,11 +5,15 @@ from pathlib import Path
 from datetime import datetime
 
 
-BASE_DIR = Path.home() / "turtlebot4_ws" / "final_project"
+# 저장소 루트 기준으로 잡는다. 이 스크립트는 calibration_tools/ 안에 있다.
+# (예전에는 ~/turtlebot4_ws/final_project 가 하드코딩돼 있어 다른 PC 에서 깨졌다.)
+REPO_DIR = Path(__file__).resolve().parents[1]
+VISION_DIR = REPO_DIR / "vision_pc3"   # 모델·캘리브레이션·맵이 사는 곳
+BASE_DIR = REPO_DIR                      # captures/ dataset/ 등 작업용 산출물
 
-MAP_YAML = BASE_DIR / "final_project.yaml"
-CALIB_DIR = BASE_DIR / "calibration"
-OUTPUT_DIR = BASE_DIR / "outputs"
+MAP_YAML = VISION_DIR / "final_project.yaml"
+CALIB_DIR = VISION_DIR / "calibration"
+OUTPUT_DIR = VISION_DIR / "outputs"
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 CAM0_ID = 2

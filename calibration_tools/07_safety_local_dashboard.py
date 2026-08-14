@@ -4,6 +4,11 @@ import math
 import time
 from pathlib import Path
 
+# 저장소 루트 기준으로 잡는다. 이 스크립트는 calibration_tools/ 안에 있다.
+# (예전에는 ~/turtlebot4_ws/final_project 가 하드코딩돼 있어 다른 PC 에서 깨졌다.)
+REPO_DIR = Path(__file__).resolve().parents[1]
+VISION_DIR = REPO_DIR / "vision_pc3"   # 모델·캘리브레이션·맵이 사는 곳
+
 import cv2
 import numpy as np
 from ultralytics import YOLO
@@ -985,8 +990,8 @@ def main():
         "--det-model",
         type=str,
         default=str(
-            Path.home()
-            / "turtlebot4_ws/final_project/yolo_experiments/v8n_640_e50/weights/best.pt"
+            VISION_DIR
+            / "yolo_experiments/best.pt"
         ),
     )
     parser.add_argument("--pose-model", type=str, default="yolo11n-pose.pt")
@@ -996,12 +1001,12 @@ def main():
     parser.add_argument(
         "--map-yaml",
         type=str,
-        default=str(Path.home() / "turtlebot4_ws/final_project/final_project.yaml"),
+        default=str(VISION_DIR / "final_project.yaml"),
     )
     parser.add_argument(
         "--homography",
         type=str,
-        default=str(Path.home() / "turtlebot4_ws/final_project/calibration/cam0_to_map.npz"),
+        default=str(VISION_DIR / "calibration/cam0_to_map.npz"),
     )
     parser.add_argument(
         "--homography-output",
@@ -1031,7 +1036,7 @@ def main():
     parser.add_argument(
         "--state-json",
         type=str,
-        default=str(Path.home() / "turtlebot4_ws/final_project/outputs/safety_state.json"),
+        default=str(VISION_DIR / "outputs/safety_state.json"),
     )
 
     parser.add_argument("--display-w", type=int, default=1280)
